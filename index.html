@@ -8,6 +8,18 @@
   <title>SEO local para automoción | Mainez Local</title>
   <link rel="icon" href="/assets/mainez-local-favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    .cookie-settings { border: 0; border-bottom: 1px solid currentColor; padding: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+    .cookie-banner[hidden] { display: none; }
+    .cookie-banner { position: fixed; z-index: 1000; right: 24px; bottom: 24px; width: min(440px, calc(100vw - 32px)); padding: 24px; border: 1px solid #d3dfd7; border-radius: 12px; background: #fff; color: #184b3c; box-shadow: 0 16px 50px rgba(10, 39, 30, .22); }
+    .cookie-banner h2 { margin: 0 0 8px; font-size: 20px; line-height: 1.2; }
+    .cookie-banner p { margin: 0; font-size: 15px; line-height: 1.5; }
+    .cookie-banner a { color: #087e65; text-decoration: underline; }
+    .cookie-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .cookie-actions button { flex: 1; min-height: 44px; border: 1px solid #184b3c; border-radius: 4px; background: #184b3c; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+    .cookie-actions button:hover, .cookie-actions button:focus-visible { background: #087e65; border-color: #087e65; }
+    @media (max-width: 480px) { .cookie-banner { right: 16px; bottom: 16px; padding: 20px; } }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
@@ -80,7 +92,69 @@
     </div></section>
   </main>
 
-  <footer class="footer"><div class="wrap footer-inner"><picture><source media="(max-width: 767px)" srcset="/assets/mainez-local-stacked-light.svg"><img src="/assets/mainez-local-horizontal-light.svg" alt="Mainez Local" width="360" height="57"></picture><p>SEO local para negocios de automoción en España.<br><span>Una marca de Mainez &amp; Asociados.</span></p><a href="#inicio">Volver arriba ↑</a></div></footer>
+  <footer class="footer"><div class="wrap footer-inner"><picture><source media="(max-width: 767px)" srcset="/assets/mainez-local-stacked-light.svg"><img src="/assets/mainez-local-horizontal-light.svg" alt="Mainez Local" width="360" height="57"></picture><p>SEO local para negocios de automoción en España.<br><span>Una marca de Mainez &amp; Asociados.</span></p><button class="cookie-settings" type="button" id="cookie-settings">Configurar cookies</button><a href="#inicio">Volver arriba ↑</a></div></footer>
+
+  <div class="cookie-banner" id="cookie-banner" role="dialog" aria-modal="false" aria-labelledby="cookie-title" hidden>
+    <h2 id="cookie-title">Cookies de publicidad</h2>
+    <p>Mainez Local usa el Pixel de Meta para medir las visitas y las reservas confirmadas. Solo se activa si aceptas. Puedes cambiar tu elección desde «Configurar cookies». <a href="https://mainezasociados.com/politicaprivacidad" target="_blank" rel="noopener noreferrer">Política de privacidad</a>.</p>
+    <div class="cookie-actions"><button type="button" id="cookie-reject">Rechazar</button><button type="button" id="cookie-accept">Aceptar</button></div>
+  </div>
+
+  <script>
+    (function () {
+      var pixelId = '1624497902558533';
+      var consentKey = 'mainez-local-meta-consent';
+      var banner = document.getElementById('cookie-banner');
+      var trackedBooking = false;
+      var consent;
+
+      try { consent = localStorage.getItem(consentKey); } catch (error) { consent = null; }
+
+      function startPixel() {
+        if (window.fbq) return;
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', pixelId);
+        fbq('track', 'PageView');
+      }
+
+      function saveConsent(value) {
+        var wasAccepted = consent === 'accepted';
+        consent = value;
+        try { localStorage.setItem(consentKey, value); } catch (error) { /* The current visit still respects the choice. */ }
+        banner.hidden = true;
+        if (value === 'accepted') startPixel();
+        if (value === 'rejected' && wasAccepted) {
+          document.cookie = '_fbp=; Max-Age=0; path=/; SameSite=Lax';
+          document.cookie = '_fbc=; Max-Age=0; path=/; SameSite=Lax';
+          window.location.reload();
+        }
+      }
+
+      document.getElementById('cookie-accept').addEventListener('click', function () { saveConsent('accepted'); });
+      document.getElementById('cookie-reject').addEventListener('click', function () { saveConsent('rejected'); });
+      document.getElementById('cookie-settings').addEventListener('click', function () {
+        banner.hidden = false;
+        document.getElementById('cookie-reject').focus();
+      });
+
+      if (consent === 'accepted') startPixel();
+      else if (consent !== 'rejected') banner.hidden = false;
+
+      window.addEventListener('message', function (message) {
+        if (message.origin !== 'https://calendly.com' || !message.data || message.data.event !== 'calendly.event_scheduled') return;
+        if (trackedBooking || consent !== 'accepted' || typeof window.fbq !== 'function') return;
+        trackedBooking = true;
+        fbq('track', 'Lead');
+      });
+    }());
+  </script>
 
 </body>
 </html>
